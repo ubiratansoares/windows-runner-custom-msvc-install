@@ -1,0 +1,44 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  install-custom-msvc:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [windows-11-vs2026-arm, windows-11-arm]
+
+    steps:
+      - name: Project Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+
+      - name: Check disk space (before)
+        shell: pwsh -Command $ErrorActionPreference='stop'; $PSNativeCommandUseErrorActionPreference=$true; & '{0}'
+        run: custom-install.ps1
+
+      - name: Print selected MSVC versions
+        shell: pwsh
+        run: |
+          Write-Host "VCToolsVersion=$env:VCToolsVersion"
+          Write-Host "VCToolsInstallDir=$env:VCToolsInstallDir"
+          Write-Host "Host=$env:VSCMD_ARG_HOST_ARCH Target=$env:VSCMD_ARG_TGT_ARCH"
+
+          foreach ($tool in 'cl.exe', 'link.exe', 'lib.exe') {
+              $path = (Get-Command $tool -CommandType Application -ErrorAction Stop).Source
+              $version = (Get-Item -LiteralPath $path).VersionInfo
+
+              [pscustomobject]@{
+                  Tool           = $tool
+                  Path           = $path
+                  FileVersion    = $version.FileVersion
+                  ProductVersion = $version.ProductVersion
+              } | Format-List
+          }
