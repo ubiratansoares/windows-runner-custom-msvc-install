@@ -88,7 +88,8 @@ foreach ($entry in $new_env.GetEnumerator()) {
 
 # Validate PATH before exporting anything to subsequent Actions steps.
 foreach ($expected in @($cl, $link)) {
-    $command = Get-Command (Split-Path $expected -Leaf) -CommandType Application
+    $command = Get-Command (Split-Path $expected -Leaf) `
+    -CommandType Application -All -ErrorAction Stop | Select-Object -First 1
     if ($command.Source -ine $expected) {
         throw "Expected '$expected' on PATH, but found '$($command.Source)'."
     }
