@@ -20,9 +20,9 @@ jobs:
       - name: Project Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
 
-      - name: Check disk space (before)
+      - name: Install custom MSVC
         shell: pwsh -Command $ErrorActionPreference='stop'; $PSNativeCommandUseErrorActionPreference=$true; & '{0}'
-        run: custom-install.ps1
+        run: .\custom-install.ps1
 
       - name: Print selected MSVC versions
         shell: pwsh
